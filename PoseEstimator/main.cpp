@@ -13,6 +13,7 @@
 
 #include "common.h"
 
+#define PI 3.1415926535
 #define deg (180/3.1415926535)
 
 int ReadIpFromFile(const char* filename, std::vector<Eigen::Matrix<double, 2, 4>>* ip) {
@@ -82,25 +83,45 @@ int EstimatePose(Eigen::Matrix<double, 2, 4> ip, Eigen::Matrix<double, 3, 4> op,
 
 	for (int i = 0; i < focals.size(); i++) {
 
+		
+
 		Eigen::Matrix3d tmp = rotateMatrixs[i];
 		Eigen::Matrix3d tmp1 = tmp.transpose();
 		tmp1 = -1 * tmp1;
 		Eigen::Vector3d C = tmp1 * translateVectors[i];
 
+		// ?!?!?!?!
+		//Eigen::Vector3d lol = rotateMatrixs[i].row(1);
+		//rotateMatrixs[i].row(1) = rotateMatrixs[i].row(2);
+		//rotateMatrixs[i].row(2) = lol;
+		// ?!?!?!?!
+
 		double x = C[0];
 		double y = C[1];
 		double z = C[2];
 
+		double slope = 0.0;
+		double rotate = 0.0;
 		//-----------------
-		double slope = deg * -atan2(rotateMatrixs[i](2, 1), sqrt(rotateMatrixs[i](2, 0) * rotateMatrixs[i](2, 0)   +   rotateMatrixs[i](2,2) * rotateMatrixs[i](2,2)));
-		//double rotate = deg * atan2(rotateMatrixs[i](2, 0), rotateMatrixs[i](2,2)); // 2 0
+		//slope = deg * -atan2(rotateMatrixs[i](2, 1), sqrt(rotateMatrixs[i](2, 0) * rotateMatrixs[i](2, 0)   +   rotateMatrixs[i](2,2) * rotateMatrixs[i](2,2)));
+		//rotate = deg * atan2(rotateMatrixs[i](2, 0), rotateMatrixs[i](2,2)); // 2 0
 
 		//double slope = deg * -atan2(rotateMatrixs[i](1, 2), sqrt(rotateMatrixs[i](0, 2) * rotateMatrixs[i](0, 2) + rotateMatrixs[i](2, 2) * rotateMatrixs[i](2, 2)));
-		double rotate = deg * atan2(rotateMatrixs[i](0, 2), rotateMatrixs[i](2, 2)); // 0 2
+		//rotate = deg * atan2(rotateMatrixs[i](0, 2), rotateMatrixs[i](2, 2)); // 0 2
 
 
-		rotate = deg * -asin(rotateMatrixs[i](0,2));        /* Считаем ось Y */
+		//rotate = deg * -asin(rotateMatrixs[i](0,2));        /* Считаем ось Y */
 		
+		//printf("SLOPE = %.2f!!!!!!\n", slope);
+		//printf("ROTATE = %.2f!!!!!!\n", rotate);
+
+
+
+
+
+		//rotate = deg * atan2(-rotateMatrixs[i](2, 0), sqrt(rotateMatrixs[i](2, 1) * rotateMatrixs[i](2, 1) + rotateMatrixs[i](2, 2) * rotateMatrixs[i](2, 2)));
+		//slope = deg * atan2(rotateMatrixs[i](2, 1), rotateMatrixs[i](2, 2));
+
 
 		//double cc = cos(-asin(rotateMatrixs[i](0, 2)));
 		//double trX = (rotateMatrixs[i](2, 2)) / cc;           /* Нет, так что находим угол по X */
@@ -108,18 +129,158 @@ int EstimatePose(Eigen::Matrix<double, 2, 4> ip, Eigen::Matrix<double, 3, 4> op,
 
 		//slope = atan2(trY, trX) * deg;
 
+
+
+
+
+		////https://www.learnopencv.com/rotation-matrix-to-euler-angles/
+		//double sy = sqrt(rotateMatrixs[i](0, 0) * rotateMatrixs[i](0, 0) + rotateMatrixs[i](1, 0) * rotateMatrixs[i](1, 0));
+		//rotate = deg * atan2(-rotateMatrixs[i](2, 0), sy);
+		//slope = deg * atan2(rotateMatrixs[i](2, 1), rotateMatrixs[i](2, 2));
+		//slope = deg * atan2(rotateMatrixs[i](1, 2), rotateMatrixs[i](1, 1));
+		//printf("SLOPE = %.2f!!!!!!\n", slope);
+		//printf("ROTATE = %.2f!!!!!!\n", rotate);
+
+
+		////http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.371.6578&rep=rep1&type=pdf
+		////
+		//if (abs(rotateMatrixs[i](2, 0)) != 1) {
+		//	double ay_1 = -asin(rotateMatrixs[i](2, 0));
+		//	double ay_2 = PI - ay_1;
+
+		//	double ax_1 = atan2(rotateMatrixs[i](2, 1) / cos(ay_1), rotateMatrixs[i](2, 2) / cos(ay_1));
+		//	double ax_2 = atan2(rotateMatrixs[i](2, 1) / cos(ay_2), rotateMatrixs[i](2, 2) / cos(ay_2));
+
+		//	double az_1 = atan2(rotateMatrixs[i](1, 0) / cos(ay_1), rotateMatrixs[i](0, 0) / cos(ay_1));
+		//	double az_2 = atan2(rotateMatrixs[i](1, 0) / cos(ay_2), rotateMatrixs[i](0, 0) / cos(ay_2));
+
+		//	printf("ay_1 = %.2f | ", deg * ay_1);
+		//	printf("ay_2 = %.2f | ", deg *  ay_2);
+
+		//	printf("ax_1 = %.2f | ", deg * ax_1);
+		//	printf("ax_2 = %.2f | ", deg * ax_2);
+
+		//	printf("az_1 = %.2f | ", deg * az_1);
+		//	printf("az_2 = %.2f \n", deg * az_2);
+		//}
+		
+		
+		////https://gamedev.stackexchange.com/questions/50963/how-to-extract-euler-angles-from-transformation-matrix
+		//double ay = atan2(-rotateMatrixs[i](2, 0), rotateMatrixs[i](0, 0));
+		//double ax = asin(rotateMatrixs[i](1, 0));
+		//double az = atan2(-rotateMatrixs[i](1, 2), rotateMatrixs[i](1, 1));
+		//printf("ay = %.2f | ", deg * ay);
+		//printf("ax = %.2f | ", deg * ax);
+		//printf("az = %.2f \n ", deg * az);
+
+
+
+
+		//https://gamedev.stackexchange.com/questions/50963/how-to-extract-euler-angles-from-transformation-matrix
+		//
+		// (X -> Y -> Z) Верно для пешеходного перехода
+		//
+		double rotXangle = atan2(-rotateMatrixs[i](1, 2), rotateMatrixs[i](2, 2));
+		double cosYangle = sqrt(pow(rotateMatrixs[i](0,0), 2) + pow(rotateMatrixs[i](0, 1), 2));
+		double rotYangle = atan2(rotateMatrixs[i](0, 2), cosYangle);
+
+		double sinXangle = sin(rotXangle);
+		double cosXangle = cos(rotXangle);
+		double rotZangle = atan2(cosXangle * rotateMatrixs[i](1, 0) + sinXangle * rotateMatrixs[i](2, 0), 
+								cosXangle * rotateMatrixs[i](1, 1) + sinXangle * rotateMatrixs[i](2, 1));
+
+		printf("ay = %.2f | ", deg * rotYangle);
+		printf("ax = %.2f | ", deg * rotXangle);
+		printf("az = %.2f \n ", deg * rotZangle);
+		//--------------------------------------------------------------------------------------------------------
+
+
+		////http://quabr.com/22709671/the-uniqueness-of-rotation-matrix
+		////
+		//// X -> Z -> Y
+		////
+		//double rotXangle = atan2(rotateMatrixs[i](2, 1), rotateMatrixs[i](1, 1)); // A
+		////double cosXangle = cos(rotXangle);
+		//double rotYangle = atan2(rotateMatrixs[i](0, 2), rotateMatrixs[i](0, 0)); // B
+
+		//double sinYangle = sin(rotYangle); //sinB
+
+		//double rotZangle = acos(rotateMatrixs[i](0, 2) / sinYangle);
+
+		////double cosYangle = sqrt(pow(rotateMatrixs[i](0,0), 2) + pow(rotateMatrixs[i](0, 1), 2));
+		////double rotYangle = atan2(rotateMatrixs[i](0, 2), cosYangle);
+		//printf("ay = %.2f | ", deg * rotYangle);
+		//printf("ax = %.2f | ", deg * rotXangle);
+		//printf("az = %.2f \n ", deg * rotZangle);
+		////--------------------------------------------------------------------------------------------------------
+
 		
 
-		rotate = abs(rotate);
-		if (rotate >= 90 && rotate < 90 + 45)
-			rotate = rotate - 90;
-
-		if (rotate >= 90 + 45)
-			rotate = 180 - rotate;
 
 
-		printf("SLOPE = %.2f!!!!!!\n", slope);
-		printf("ROTATE = %.2f!!!!!!\n", rotate);
+
+
+
+		////Из лекций Алексея
+		////
+		//double rotXangle = asin(rotateMatrixs[i](1,2));
+		//double cosXangle = cos(rotXangle);
+		//double rotYangle = acos(rotateMatrixs[i](2, 2) / cosXangle);
+		//double rotZangle = acos(rotateMatrixs[i](1, 1) / cosXangle);
+
+
+		//printf("ay (rotate) = %.2f | ", deg * rotYangle);
+		//printf("ax (slope) = %.2f | ", deg * rotXangle);
+		//printf("az = %.2f \n ", deg * rotZangle);
+		////----------------------------
+
+		//https://stackoverflow.com/questions/15022630/how-to-calculate-the-angle-from-rotation-matrix
+		//
+		//double rotXangle = atan2(rotateMatrixs[i](2, 1), rotateMatrixs[i](2,2));
+		//double cosXangle = cos(rotXangle);
+		//double rotYangle = acos(rotateMatrixs[i](2, 2) / cosXangle);
+		//double rotZangle = acos(rotateMatrixs[i](1, 1) / cosXangle);
+
+		//printf("ay (rotate) = %.2f | ", deg * rotYangle);
+		//printf("ax (slope) = %.2f | \n", deg * rotXangle);
+		//printf("az = %.2f \n ", deg * rotZangle);
+
+
+
+		////http://nghiaho.com/?page_id=846
+		////
+		//double rotXangle = atan2(rotateMatrixs[i](2, 1), rotateMatrixs[i](2, 2));
+		//double rotYangle = atan2(-rotateMatrixs[i](2, 0), sqrt(rotateMatrixs[i](2, 1)*rotateMatrixs[i](2, 1) + rotateMatrixs[i](2, 2)*rotateMatrixs[i](2, 2)));
+		//double rotZangle = atan2(rotateMatrixs[i](1, 0), rotateMatrixs[i](0, 0));
+		//printf("ay (rotate) = %.2f | ", deg * rotYangle);
+		//printf("ax (slope) = %.2f | ", deg * rotXangle);
+		//printf("az = %.2f \n ", deg * rotZangle);
+
+
+
+
+
+	
+
+
+
+
+
+
+		//slope = deg * atan2(rotateMatrixs[i](2, 1) / cos(-asin(rotateMatrixs[i](2, 0))),
+		//				rotateMatrixs[i](2, 2) / cos(-asin(rotateMatrixs[i](2, 0))));
+		//rotate = deg * a_y;
+
+		//rotate = abs(rotate);
+		//if (rotate >= 90 && rotate < 90 + 45)
+		//	rotate = rotate - 90;
+
+		//if (rotate >= 90 + 45)
+		//	rotate = 180 - rotate;
+
+
+		//printf("SLOPE = %.2f!!!!!!\n", slope);
+		//printf("ROTATE = %.2f!!!!!!\n", rotate);
 		//-----------------
 		//printf("height = %f\n", y);
 		//printf("focal = %f\n", focals[i]);
@@ -127,9 +288,14 @@ int EstimatePose(Eigen::Matrix<double, 2, 4> ip, Eigen::Matrix<double, 3, 4> op,
 		//printf("slope = %f\n", deg * atan(y / z));
 		//printf("\n\n*****************\n");
 
+
+
+		rotate = deg * rotYangle;
+		slope = deg * rotXangle;
 		//if (abs(y) >= 0) {
-		if (abs(slope) <= 25 && abs(slope) >= 5) {
-			if (rotate >= 10 && rotate <= 30) {
+		//if (abs(slope) <= 25 && abs(slope) >= 5) {
+			//if (rotate >= 10 && rotate <= 30) {
+		if(abs(deg * rotZangle) < 1.0) {
 
 				//printf("SLOPE = %.2f!!!!!!\n", slope);
 				//printf("ROTATE = %.2f!!!!!!\n", rotate);
@@ -143,7 +309,7 @@ int EstimatePose(Eigen::Matrix<double, 2, 4> ip, Eigen::Matrix<double, 3, 4> op,
 				result->x = C[0];
 				result->y = C[1];
 				result->z = C[2];
-			}
+			//}
 		}
 	}
 
@@ -156,6 +322,7 @@ int PrintHist(std::vector<PoseResult> res) {
 	int size = res.size();
 	
 	for (int i = 0; i < size; i++) {
+
 
 		if (res[i].focal != -1.0 ) {//&& res[i].height > 0) {
 			//double h = round(res[i].height / 100);
@@ -200,19 +367,19 @@ void main(void) {
 
 	double offset = 450;
 
-	op << 0, w, w, 0,
-		offset, offset, offset + h, offset + h,
-		0, 0, 0, 0;
+	//op << 0, w, w, 0,
+	//	offset, offset, offset + h, offset + h,
+	//	0, 0, 0, 0;
 
 	//op << 0, 1, 1, 0,
 	//	0, 0, h/w, h/w,
 	//	0, 0, 0, 0;
 
-	//op <<	0,     0,    4.0,    4.0,
-	//		0,     0,      0,      0,
-	//		0,  40.0,      0,   40.0;
+	op <<	0,     0,    4.0,    4.0,
+			0,     0,      0,      0,
+			0,  40.0,      0,   40.0;
 
-	if (ReadIpFromFile("data1.txt", &ip_vector) < 0)
+	if (ReadIpFromFile("data2.txt", &ip_vector) < 0)
 		printf("File error!\n");
 
 	double height_avr = 0.0;
@@ -223,6 +390,8 @@ void main(void) {
 	double focal_avr = 0.0;
 	int count = 0;
 	for (int i = 0; i < ip_vector.size(); i++) {
+
+		printf("****** i = %i ******** \n", i);
 
 		if (EstimatePose(ip_vector[i], op, &result) < 0)
 			printf("Estimate error!\n");
