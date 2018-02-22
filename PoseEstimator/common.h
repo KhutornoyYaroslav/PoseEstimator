@@ -9,6 +9,7 @@ struct PoseResult {
 	double height = 0.0;
 	double rotate = 0.0;
 	double slope  = 0.0;
+	double roll = 0.0;
 
 	double focal = 0.0;
 

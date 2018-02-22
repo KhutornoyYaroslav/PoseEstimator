@@ -208,12 +208,15 @@ int P4pf::getRigidTransform2(Eigen::Matrix<double, 3, Eigen::Dynamic> p1, Eigen:
 	else
 		S(2, 2) = (double)this->signOf((double)(U*V.transpose()).determinant());
 
+
+
 	//Check of S
 	if (DBG_TR) std::cout << "filled S\n";
 	if (DBG_TR) std::cout << "S\n" << S << "\n\n";
 
 	// Final calculations of R and T, than verified by printing them
 	Eigen::Matrix<double, 3, 3> R = U * S*(V.transpose());
+
 	Eigen::Matrix<double, 3, 1> t = -R * p1mean + p2mean;
 	if (DBG_TR) std::cout << "R and t\n";
 	if (DBG_TR) std::cout << "R\n" << R << "\n\n";
@@ -814,7 +817,7 @@ int P4pf::P4Pf(Eigen::Matrix<double, 2, 4> m2D, Eigen::Matrix<double, 3, 4> M3D,
 
 		if (DBG) std::cout << "\n********************************************** BEGIN GETRIGIDTRANSFORM2**********************************************\n";
 
-		int errorCheck = getRigidTransform2(M3D, p3dc, false, &rigidTrasform_results);
+		int errorCheck = getRigidTransform2(M3D, p3dc, false, &rigidTrasform_results);	
 		if (errorCheck == -1)
 		{
 			return -1;
